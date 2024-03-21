@@ -147,21 +147,32 @@ function App() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('https://swapi.dev/api/films/');
+      const response = await fetch('https://react-project-82760-default-rtdb.firebaseio.com/movies.json');
       if (!response.ok) {
         throw new Error('something went wrong');
       }
       const data = await response.json();
+      const loadedMovies =[];
+      for(const key in data){
+        loadedMovies.push({
+          id:key,
+          title:data[key].title,
+          openningText:data[key].openingText,
+          releaseDate:data[key].releaseDate
 
-      const transformedMovies = data.results.map((movieData) => {
-        return {
-          id: movieData.episode_id,
-          title: movieData.title,
-          openingText: movieData.opening_crawl,
-          releaseDate: movieData.release_date // corrected key name
-        };
-      });
-      setMovies(transformedMovies);
+        })
+      }
+
+
+      // const transformedMovies = data.map((movieData) => {
+      //   return {
+      //     id: movieData.episode_id,
+      //     title: movieData.title,
+      //     openingText: movieData.opening_crawl,
+      //     releaseDate: movieData.release_date // corrected key name
+      //   };
+      // });
+      setMovies(loadedMovies);
       setIsLoading(false);
     } catch (error) {
       setError(error.message);
@@ -173,10 +184,38 @@ function App() {
     fetchMoviesHandler();
   }, [fetchMoviesHandler]);
 
-  const addMovieHandler = () => {
-    console.log(newMovie);
-    // Here you can send a request to add the movie to the backend or update the state to display it on the front end
-  };
+  async function addMovieHandler() {
+    try {
+      const response = await fetch('https://react-project-82760-default-rtdb.firebaseio.com/movies.json', {
+        method: 'POST',
+        body: JSON.stringify(newMovie),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to add movie.');
+      }
+      const data = await response.json();
+      console.log(data);
+      // Optionally, you can update state or perform other actions after successfully adding the movie
+    } catch (error) {
+      console.error('Error adding movie:', error.message);
+    }
+  }
+//   async function addMovieHandler () {
+//   const response= await fetch('https://react-project-82760-default-rtdb.firebaseio.com/movies.json',{
+//   method: 'POST',
+//   body: JSON.stringify(newMovie),
+//   header:{
+//     'Content-Type': 'application/json'
+//   }
+// });
+//   const data= await response.json();
+//   console.log(data);
+
+//     // Here you can send a request to add the movie to the backend or update the state to display it on the front end
+//   };
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
